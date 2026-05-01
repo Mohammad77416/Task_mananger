@@ -3,7 +3,15 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 class User(AbstractUser):
-    pass
+    ROLE_CHOICES = (
+        ('ADMIN','ادمین سیستم'),
+        ('Mananger','مدیر سیستم'),
+        ('MEMBER','عضو عادی'),
+    )
+    role = models.CharField(max_length=10,choices=ROLE_CHOICES,default='MEMBER',verbose_name='نقش کاربری')
+    
+    def __str__(self):
+        return f"{self.username} ({self.get_role_display()})"
 
 class Project(models.Model):
     name = models.CharField(max_length=255)
@@ -31,9 +39,10 @@ class Task(models.Model):
     status = models.CharField(max_length=20,choices=STATUS_CHOICES,default='TODO')
     priority = models.CharField(max_length=10,choices=PRIORITY_CHOICES,default='M')
     due_date = models.DateTimeField(null=True,blank=True)
-    Project = models.ForeignKey(Project,on_delete=models.CASCADE,related_name='tasks')
+    project = models.ForeignKey(Project,on_delete=models.CASCADE,related_name='tasks')
     assignee = models.ForeignKey(User,on_delete=models.CASCADE,related_name='assignee')
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.title
+    

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "tasks",
     'drf_spectacular',
     'drf_spectacular_sidecar',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -78,8 +79,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "mssql",
+        "NAME": "TaskManagerDB",
+        "USER": "ma",
+        'PASSWORD': 'Alibakhshi77',
+        'HOST': 'localhost',    
+        'PORT': '1433',       
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server', 
+        },
     }
 }
 
@@ -127,6 +135,13 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS' : [
+        
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+        
+    ],
 }
 
 SPECTACULAR_SETTINGS = {
