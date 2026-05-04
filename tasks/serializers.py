@@ -39,3 +39,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField(help_text="send refresh token")
+    
+class PasswordResetRequestSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    otp = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)

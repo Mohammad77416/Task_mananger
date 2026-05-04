@@ -12,7 +12,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from .models import User,Project,Task,Sprint
-from .serializers import UserSerializer,ProjectSerializer,TaskSerializer,RegisterSerializer,SprintSerializer,LogoutSerializer
+from .serializers import UserSerializer,ProjectSerializer,TaskSerializer,RegisterSerializer,SprintSerializer,LogoutSerializer,PasswordResetConfirmSerializer,PasswordResetRequestSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema , inline_serializer
 # Create your views here.
@@ -66,6 +66,38 @@ class RegisterView(mixins.CreateModelMixin,viewsets.GenericViewSet):
             return Response({"message":"با موفقیت خارج شدید"},status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response({"error":"توکن نامعتبر است"},status=status.HTTP_400_BAD_REQUEST)
+        
+    @extend_schema(request=PasswordResetRequestSerializer)
+    @action(detail=False,methods=['post'],permission_classes=[IsAuthenticated])
+    def passwordReset(self,request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            try:
+                user = User.objects.get(username=username)
+                return Response({"message":"کد بازیابی با موفقیت ارسال شد"},status=status.HTTP_200_OK)
+            except user.DoesNotExist:
+                return Response({"message":"کد بازیابی در صورت وجو کاربر ارسال خواهد شد"},status=status.HTTP_200_OK)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    @extend_schema(request=PasswordResetConfirmSerializer)
+    @action(detail=False,methods=['post'],permission_classes=[IsAuthenticated])
+    def passwordResetConfirms(self,request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            otp = serializer.validated_data['otp']
+            new_password = serializer.data['new_password']
+            try:
+                user = User.objects.get(username=username)
+                user.set_password(new_password)
+                user.save()
+                return Response({"message":"رمز عبور با موفقیت تغییر پیدا کرد"},status=status.HTTP_200_OK)
+            except user.DoesNotExist:
+                return Response({"error":"کاربر یافت نشد"},status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            
+            
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
