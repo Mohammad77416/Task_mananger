@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Project,Task
+from .models import Project,Task,Sprint,User
 
 User = get_user_model()
 
@@ -19,6 +19,11 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
         
+class SprintSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sprint
+        fields = '__all__'
+        
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     class Meta:
@@ -31,3 +36,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+    
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(help_text="send refresh token")
