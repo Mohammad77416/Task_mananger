@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from rest_framework import viewsets , mixins
+from rest_framework import viewsets , mixins , filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView 
 from rest_framework.decorators import action 
 from rest_framework import generics , status
@@ -33,14 +34,16 @@ class ProjectViewSet(viewsets.ModelViewSet):
 @extend_schema(tags=['Tasks'])
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
+    filter_backends = [DjangoFilterBackend,filters.SearchFilter]
+    search_fields = ['summary','description']
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
-    filter_backends = [DjangoFilterBackend , SearchFilter , OrderingFilter]
-    filterset_fields = ['status', 'priority', 'project', 'assignee']
-    search_fields = ['title', 'description']
-    ordering_fields = ['due_date', 'created_at', 'priority']
+    filterset_fields = ['status', 'project', 'assignee','reporter']
     ordering = ['-created_at']
+    
+    def perform_create(self, serializer):
+        serializer.save(reporter=self.request.user)
     
 @extend_schema(tags=['Login'])
 class RegisterView(mixins.CreateModelMixin,viewsets.GenericViewSet):

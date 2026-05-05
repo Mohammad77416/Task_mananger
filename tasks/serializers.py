@@ -15,9 +15,15 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class TaskSerializer(serializers.ModelSerializer):
+    # priority = serializers.CharField(write_only=True, required=False) 
     class Meta:
         model = Task
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ['id','summary', 'description', 'status', 'project', 'reporter', 'priority', 'created_at','attachment', 'issue_type', 'sprint', 'assignee','reporter'] 
+        read_only_fields = ['reporter']
+        extra_kwargs = {
+            'priority': {'write_only': True, 'required': False}
+        }
         
 class SprintSerializer(serializers.ModelSerializer):
     class Meta:

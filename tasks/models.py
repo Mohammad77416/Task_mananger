@@ -60,8 +60,8 @@ class Task(models.Model):
         ('DONE','Done'),
     ]
     project = models.ForeignKey(Project,on_delete=models.CASCADE,related_name='tasks')
-    issu_type = models.CharField(max_length=20,choices=ISSUE_TYPE,default="T")
-    title = models.CharField(max_length=255)
+    issue_type = models.CharField(max_length=20,choices=ISSUE_TYPE,default="T")
+    summary = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     priority = models.CharField(max_length=10,choices=PRIORITY_CHOICES,default='M')
     attachment = models.ImageField(upload_to='project/',blank=True,null=True)
@@ -70,7 +70,8 @@ class Task(models.Model):
     status = models.CharField(max_length=20,choices=STATUS_CHOICES,default='TODO')
     due_date = models.DateTimeField(null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    reporter = models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True,related_name='reported_tasks')
     
     def __str__(self):
-        return self.title
+        return self.summary
     
