@@ -87,7 +87,7 @@ DATABASES = {
         "USER": "ma",
         'PASSWORD': 'Alibakhshi77',
         'HOST': 'localhost',    
-        'PORT': '1433',       
+        'PORT': '1450',       
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server', 
         },
@@ -175,4 +175,17 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 

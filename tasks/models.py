@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models.signals import post_save , post_delete
+from django.dispatch import receiver
+from django.core.cache import cache
+# from .models import Task
 
 # Create your models here.
 class User(AbstractUser):
@@ -75,3 +79,16 @@ class Task(models.Model):
     def __str__(self):
         return self.summary
     
+def invalidate_user_task_cache(user_id):
+    pattern = f'*task_list_user_{user_id}_*'
+    cache.delete_pattern(pattern)
+    
+@receiver(post_save,sender=Task)
+def clear_task_cache_on_save(sender,instance,**kwargs):
+    if instance.reporter:
+        invalidate_user_task_cache(instance.reporter.id)
+
+@receiver(post_delete,sender=Task)
+def clear_task_cache_on_delete(sender,instance,**kwargs):
+    if instance.reporter:
+        invalidate_user_task_cache(instance.reporter.id)

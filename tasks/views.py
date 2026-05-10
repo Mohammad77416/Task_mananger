@@ -16,6 +16,7 @@ from .models import User,Project,Task,Sprint
 from .serializers import UserSerializer,ProjectSerializer,TaskSerializer,RegisterSerializer,SprintSerializer,LogoutSerializer,PasswordResetConfirmSerializer,PasswordResetRequestSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema , inline_serializer
+from django.core.cache import cache
 # Create your views here.
 User = get_user_model()
 
@@ -44,6 +45,22 @@ class TaskViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(reporter=self.request.user)
+        
+    def list(self, request, *args, **kwargs):
+        user_id = request.user.id
+        query_string = request.META.get('Query_String','')
+        cache_key = f'task_list_user_{user_id}_{query_string}'
+        cache_data = cache.get(cache_key)
+        if cache_data is not None:
+            print("Fetching from redis cache ...")
+            return Response(cache_data)
+        print("Fetching from database ...")
+        response = super().list(request,*args,**kwargs)
+        
+        cache.set(cache_key,response.data,900)
+        
+        return response
+            
     
 @extend_schema(tags=['Login'])
 class RegisterView(mixins.CreateModelMixin,viewsets.GenericViewSet):
